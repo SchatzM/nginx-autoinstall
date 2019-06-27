@@ -6,7 +6,7 @@ if [[ "$EUID" -ne 0 ]]; then
 fi
 
 # Define versions
-NGINX_MAINLINE_VER=1.17.0
+NGINX_MAINLINE_VER=1.17.1
 NGINX_STABLE_VER=1.16.0
 LIBRESSL_VER=2.9.0
 OPENSSL_VER=1.1.1c
@@ -157,9 +157,9 @@ case $OPTION in
 		#Brotli
 		if [[ "$BROTLI" = 'y' ]]; then
 			cd /usr/local/src/nginx/modules || exit 1
-			git clone https://github.com/eustas/ngx_brotli
+			git clone https://github.com/Sembiance/ngx_brotli
 			cd ngx_brotli || exit 1
-			git checkout v0.1.2
+			git checkout v0.1.4
 			git submodule update --init
 		fi
 
@@ -269,6 +269,7 @@ case $OPTION in
 		--with-http_auth_request_module \
 		--with-http_slice_module \
 		--with-http_stub_status_module \
+		--with-http_gzip_static_module
 		--with-http_realip_module"
 
 		# Optional modules
