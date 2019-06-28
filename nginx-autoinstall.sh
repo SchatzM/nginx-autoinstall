@@ -23,7 +23,6 @@ if [[ "$HEADLESS" == "y" ]]; then
 	GEOIP=${GEOIP:-n}
 	FANCYINDEX=${FANCYINDEX:-n}
 	CACHEPURGE=${CACHEPURGE:-n}
-	WEBDAV=${WEBDAV:-n}
 	SSL=${SSL:-1}
 	RM_CONF=${RM_CONF:-y}
 	RM_LOGS=${RM_LOGS:-y}
@@ -96,9 +95,6 @@ case $OPTION in
 			while [[ $CACHEPURGE != "y" && $CACHEPURGE != "n" ]]; do
 				read -p "       ngx_cache_purge [y/n]: " -e CACHEPURGE
 			done
-			while [[ $WEBDAV != "y" && $WEBDAV != "n" ]]; do
-				read -p "       nginx WebDAV [y/n]: " -e WEBDAV
-			done
 			echo ""
 			echo "Choose your OpenSSL implementation :"
 			echo "   1) System's OpenSSL ($(openssl version | cut -c9-14))"
@@ -134,8 +130,8 @@ case $OPTION in
 		mkdir -p /usr/local/src/nginx/modules
 
 		# Dependencies
-		apt-get update
-		apt-get install -y build-essential ca-certificates wget curl libpcre3 libpcre3-dev autoconf unzip automake libtool tar git libssl-dev zlib1g-dev uuid-dev lsb-release libxml2-dev libxslt1-dev
+		apt update
+		apt install -y build-essential ca-certificates wget curl libpcre3 libpcre3-dev autoconf unzip automake libtool tar git libssl-dev zlib1g-dev uuid-dev lsb-release libxml2-dev libxslt1-dev
 
 		#Brotli
 		if [[ "$BROTLI" = 'y' ]]; then
@@ -283,11 +279,6 @@ case $OPTION in
 		if [[ "$FANCYINDEX" = 'y' ]]; then
 			git clone --quiet https://github.com/aperezdc/ngx-fancyindex.git /usr/local/src/nginx/modules/fancyindex
 			NGINX_MODULES=$(echo "$NGINX_MODULES"; echo --add-module=/usr/local/src/nginx/modules/fancyindex)
-		fi
-		
-		if [[ "$WEBDAV" = 'y' ]]; then
-			git clone --quiet https://github.com/arut/nginx-dav-ext-module.git /usr/local/src/nginx/modules/nginx-dav-ext-module
-			NGINX_MODULES=$(echo "$NGINX_MODULES"; echo --with-http_dav_module --add-module=/usr/local/src/nginx/modules/nginx-dav-ext-module)
 		fi
 
 		./configure $NGINX_OPTIONS $NGINX_MODULES
