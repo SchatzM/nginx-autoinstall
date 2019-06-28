@@ -8,9 +8,8 @@ fi
 # Define versions
 NGINX_MAINLINE_VER=1.17.1
 NGINX_STABLE_VER=1.16.0
-LIBRESSL_VER=2.9.0
+LIBRESSL_VER=2.9.2
 OPENSSL_VER=1.1.1c
-NPS_VER=1.13.35.2
 HEADERMOD_VER=0.33
 LIBMAXMINDDB_VER=1.3.2
 GEOIP2_VER=3.2
@@ -19,7 +18,6 @@ GEOIP2_VER=3.2
 if [[ "$HEADLESS" == "y" ]]; then
 	OPTION=${OPTION:-1}
 	NGINX_VER=${NGINX_VER:-1}
-	PAGESPEED=${PAGESPEED:-n}
 	BROTLI=${BROTLI:-n}
 	HEADERMOD=${HEADERMOD:-n}
 	GEOIP=${GEOIP:-n}
@@ -83,9 +81,6 @@ case $OPTION in
 			echo "If you select none, Nginx will be installed with its default modules."
 			echo ""
 			echo "Modules to install :"
-			while [[ $PAGESPEED != "y" && $PAGESPEED != "n" ]]; do
-				read -p "       PageSpeed $NPS_VER [y/n]: " -e PAGESPEED
-			done
 			while [[ $BROTLI != "y" && $BROTLI != "n" ]]; do
 				read -p "       Brotli [y/n]: " -e BROTLI
 			done
@@ -141,18 +136,6 @@ case $OPTION in
 		# Dependencies
 		apt-get update
 		apt-get install -y build-essential ca-certificates wget curl libpcre3 libpcre3-dev autoconf unzip automake libtool tar git libssl-dev zlib1g-dev uuid-dev lsb-release libxml2-dev libxslt1-dev
-
-		# PageSpeed
-		if [[ "$PAGESPEED" = 'y' ]]; then
-			cd /usr/local/src/nginx/modules || exit 1
-			wget https://github.com/pagespeed/ngx_pagespeed/archive/v${NPS_VER}-stable.zip
-			unzip v${NPS_VER}-stable.zip
-			cd incubator-pagespeed-ngx-${NPS_VER}-stable || exit 1
-			psol_url=https://dl.google.com/dl/page-speed/psol/${NPS_VER}.tar.gz
-			[ -e scripts/format_binary_url.sh ] && psol_url=$(scripts/format_binary_url.sh PSOL_BINARY_URL)
-			wget "${psol_url}"
-			tar -xzvf "$(basename "${psol_url}")"
-		fi
 
 		#Brotli
 		if [[ "$BROTLI" = 'y' ]]; then
@@ -275,10 +258,6 @@ case $OPTION in
 		# Optional modules
 		if [[ "$LIBRESSL" = 'y' ]]; then
 			NGINX_MODULES=$(echo "$NGINX_MODULES"; echo --with-openssl=/usr/local/src/nginx/modules/libressl-${LIBRESSL_VER})
-		fi
-
-		if [[ "$PAGESPEED" = 'y' ]]; then
-			NGINX_MODULES=$(echo "$NGINX_MODULES"; echo "--add-module=/usr/local/src/nginx/modules/incubator-pagespeed-ngx-${NPS_VER}-stable")
 		fi
 
 		if [[ "$BROTLI" = 'y' ]]; then
@@ -407,7 +386,7 @@ case $OPTION in
 		exit
 	;;
 	3) # Update the script
-		wget https://raw.githubusercontent.com/Angristan/nginx-autoinstall/master/nginx-autoinstall.sh -O nginx-autoinstall.sh
+		wget https://raw.githubusercontent.com/SchatzM/nginx-autoinstall/master/nginx-autoinstall.sh -O nginx-autoinstall.sh
 		chmod +x nginx-autoinstall.sh
 		echo ""
 		echo "Update done."
