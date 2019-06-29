@@ -100,6 +100,11 @@ case $OPTION in
 				read -p "       nginx WebDAV [y/n]: " -e WEBDAV
 			done
 			echo ""
+                        echo "Apply patches for HTTP2 HPACK Encoding and OpenSSL ChaCha cipher prioritization?"
+                        while [[ $PATCH != "y" && $PATCH != "n" ]]; do
+                                read -p "      HPACK & ChaCha prioritization patches [y/n]: " -e PATCH
+                        done
+			echo ""
 			echo "Choose your OpenSSL implementation :"
 			echo "   1) System's OpenSSL ($(openssl version | cut -c9-14))"
 			echo "   2) OpenSSL $OPENSSL_VER from source"
@@ -228,6 +233,16 @@ case $OPTION in
 			wget https://raw.githubusercontent.com/Angristan/nginx-autoinstall/master/conf/nginx.conf
 		fi
 		cd /usr/local/src/nginx/nginx-${NGINX_VER} || exit 1
+
+		#HPACK & OpenSSL ChaCha patch.
+		if [[ "$PATCH" = 'y' ]]; then
+                        {
+                                wget https://raw.githubusercontent.com/hakasenyang/openssl-patch/master/nginx_hpack_push_1.15.3.patch
+                                patch -p1 < nginx_hpack_push_1.15.3.patch
+                                wget https://raw.githubusercontent.com/kn007/patch/master/nginx_auto_using_PRIORITIZE_CHACHA.patch
+                                patch -p1 < nginx_auto_using_PRIORITIZE_CHACHA.patch
+                        } >> /tmp/nginx-autoinstall.log 2>&1
+                fi
 
 		NGINX_OPTIONS="
 		--prefix=/etc/nginx \
