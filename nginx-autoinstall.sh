@@ -96,6 +96,12 @@ case $OPTION in
 				read -p "       ngx_cache_purge [y/n]: " -e CACHEPURGE
 			done
 			echo ""
+                        echo "Apply kn007's patches for HTTP2 HPACK Encoding and Dynamic TLS Record support?"
+                        echo ""
+                        while [[ $PATCH != "y" && $PATCH != "n" ]]; do
+                                read -p "      HPACK & Dynamic TLS Record patches [y/n]: " -e PATCH
+                        done
+			echo ""
 			echo "Choose your OpenSSL implementation :"
 			echo "   1) System's OpenSSL ($(openssl version | cut -c9-14))"
 			echo "   2) OpenSSL $OPENSSL_VER from source"
@@ -224,7 +230,17 @@ case $OPTION in
 			wget https://raw.githubusercontent.com/Angristan/nginx-autoinstall/master/conf/nginx.conf
 		fi
 		cd /usr/local/src/nginx/nginx-${NGINX_VER} || exit 1
-
+		
+		# Patches
+                if [[ "$PATCH" = 'y' ]]; then
+                        {
+                                wget https://raw.githubusercontent.com/kn007/patch/master/nginx.patch
+                                patch -p1 < nginx.patch
+                                wget https://raw.githubusercontent.com/kn007/patch/master/nginx_auto_using_PRIORITIZE_CHACHA.patch
+                                patch -p1 < nginx_auto_using_PRIORITIZE_CHACHA.patch
+                        } >> /tmp/nginx-autoinstall.log 2>&1
+                fi
+		
 		NGINX_OPTIONS="
 		--prefix=/etc/nginx \
 		--sbin-path=/usr/sbin/nginx \
@@ -280,7 +296,11 @@ case $OPTION in
 			git clone --quiet https://github.com/aperezdc/ngx-fancyindex.git /usr/local/src/nginx/modules/fancyindex
 			NGINX_MODULES=$(echo "$NGINX_MODULES"; echo --add-module=/usr/local/src/nginx/modules/fancyindex)
 		fi
-
+		
+		if [[ "$PATCH" = 'y' ]]; then
+                        NGINX_MODULES=$(echo "$NGINX_MODULES"; echo "--with-http_v2_hpack_enc")
+                fi
+		
 		./configure $NGINX_OPTIONS $NGINX_MODULES
 		make -j "$(nproc)"
 		make install
