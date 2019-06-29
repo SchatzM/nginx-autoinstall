@@ -396,12 +396,12 @@ case $OPTION in
 		exit
 	;;
 	3) # Update the script
-		wget https://raw.githubusercontent.com/SchatzM/nginx-autoinstall/Experimental/nginx-autoinstall.sh -O nginx-autoinstall.sh
-		chmod +x nginx-autoinstall.sh
+		wget https://raw.githubusercontent.com/SchatzM/nginx-autoinstall/Experimental/nginx-autoinstall.sh -O nginx-autoinstalll-Experimental.sh
+		chmod +x nginx-autoinstalll-Experimental.sh
 		echo ""
 		echo "Update done."
 		sleep 2
-		./nginx-autoinstall.sh
+		./nginx-autoinstalll-Experimental.sh
 		exit
 	;;
 	*) # Exit
