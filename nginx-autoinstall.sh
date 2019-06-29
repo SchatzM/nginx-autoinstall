@@ -304,6 +304,10 @@ case $OPTION in
 			git clone --quiet https://github.com/arut/nginx-dav-ext-module.git /usr/local/src/nginx/modules/nginx-dav-ext-module
 			NGINX_MODULES=$(echo "$NGINX_MODULES"; echo --with-http_dav_module --add-module=/usr/local/src/nginx/modules/nginx-dav-ext-module)
 		fi
+		
+		if [[ "$PATCH" = 'y' ]]; then
+                        NGINX_MODULES=$(echo "$NGINX_MODULES"; echo "--with-http_v2_hpack_enc")
+                fi
 
 		./configure $NGINX_OPTIONS $NGINX_MODULES
 		make -j "$(nproc)"
