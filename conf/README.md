@@ -59,3 +59,11 @@ TLS- can be TLS13-.
 ## GeoIP 2
 
 See https://github.com/leev/ngx_http_geoip2_module#example-usage
+
+## Dynamic TLS record
+
+Add this in your http block :
+
+```nginx
+ssl_dyn_rec_enable on;
+```
