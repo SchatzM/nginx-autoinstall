@@ -237,8 +237,8 @@ case $OPTION in
 		#HPACK & OpenSSL ChaCha patch.
 		if [[ "$PATCH" = 'y' ]]; then
                         {
-                                wget https://raw.githubusercontent.com/hakasenyang/openssl-patch/master/nginx_hpack_push_1.15.3.patch
-                                patch -p1 < nginx_hpack_push_1.15.3.patch
+                                wget https://raw.githubusercontent.com/SchatzM/patch/rc/nginx.patch
+                                patch -p1 < nginx.patch
                                 wget https://raw.githubusercontent.com/kn007/patch/master/nginx_auto_using_PRIORITIZE_CHACHA.patch
                                 patch -p1 < nginx_auto_using_PRIORITIZE_CHACHA.patch
                         } >> /tmp/nginx-autoinstall.log 2>&1
