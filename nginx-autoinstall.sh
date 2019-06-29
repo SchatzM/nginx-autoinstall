@@ -97,7 +97,6 @@ case $OPTION in
 			done
 			echo ""
                         echo "Apply kn007's patches for HTTP2 HPACK Encoding and Dynamic TLS Record support?"
-                        echo ""
                         while [[ $PATCH != "y" && $PATCH != "n" ]]; do
                                 read -p "      HPACK & Dynamic TLS Record patches [y/n]: " -e PATCH
                         done
