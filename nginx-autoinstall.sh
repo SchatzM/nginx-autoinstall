@@ -6,8 +6,8 @@ if [[ "$EUID" -ne 0 ]]; then
 fi
 
 # Define versions
-NGINX_MAINLINE_VER=1.17.1
-NGINX_STABLE_VER=1.16.0
+NGINX_MAINLINE_VER="$(curl -sL https://nginx.org/en/download.html 2>&1 | grep -E -o 'nginx\-[0-9.]+\.tar[.a-z]*' | awk -F "nginx-" '/.tar.gz$/ {print $2}' | sed -e 's|.tar.gz||g' | head -n 1 2>&1)"
+NGINX_STABLE_VER="$(curl -sL https://nginx.org/en/download.html 2>&1 | grep -E -o 'nginx\-[0-9.]+\.tar[.a-z]*' | awk -F "nginx-" '/.tar.gz$/ {print $2}' | sed -e 's|.tar.gz||g' | head -n 2 | grep 1.16 2>&1)"
 LIBRESSL_VER=2.9.2
 OPENSSL_VER=1.1.1c
 HEADERMOD_VER=0.33
@@ -100,9 +100,9 @@ case $OPTION in
 				read -p "       nginx WebDAV [y/n]: " -e WEBDAV
 			done
 			echo ""
-                        echo "Apply patches for HTTP2 HPACK Encoding and OpenSSL ChaCha cipher prioritization?"
+                        echo "Apply patches for HTTP2 HPACK encoding, dynamic TLS records and OpenSSL ChaCha cipher prioritization?"
                         while [[ $PATCH != "y" && $PATCH != "n" ]]; do
-                                read -p "      HPACK & ChaCha prioritization patches [y/n]: " -e PATCH
+                                read -p "       Apply patches? [y/n]: " -e PATCH
                         done
 			echo ""
 			echo "Choose your OpenSSL implementation :"
@@ -145,7 +145,7 @@ case $OPTION in
 		#Brotli
 		if [[ "$BROTLI" = 'y' ]]; then
 			cd /usr/local/src/nginx/modules || exit 1
-			git clone https://github.com/Sembiance/ngx_brotli
+			git clone https://github.com/Dalvenjia/ngx_brotli
 			cd ngx_brotli || exit 1
 			git checkout v0.1.4
 			git submodule update --init
@@ -237,8 +237,10 @@ case $OPTION in
 		#HPACK & OpenSSL ChaCha patch.
 		if [[ "$PATCH" = 'y' ]]; then
                         {
-                                wget https://raw.githubusercontent.com/hakasenyang/openssl-patch/master/nginx_hpack_push_1.15.3.patch
-                                patch -p1 < nginx_hpack_push_1.15.3.patch
+                                wget https://raw.githubusercontent.com/centminmod/centminmod/123.09beta01/patches/cloudflare/nginx-1.15.3_http2-hpack.patch
+                                patch -p1 < nginx-1.15.3_http2-hpack.patch
+                                wget https://raw.githubusercontent.com/nginx-modules/ngx_http_tls_dyn_size/master/nginx__dynamic_tls_records_1.15.5+.patch
+                                patch -p1 < nginx__dynamic_tls_records_1.15.5+.patch
                                 wget https://raw.githubusercontent.com/kn007/patch/master/nginx_auto_using_PRIORITIZE_CHACHA.patch
                                 patch -p1 < nginx_auto_using_PRIORITIZE_CHACHA.patch
                         } >> /tmp/nginx-autoinstall.log 2>&1
