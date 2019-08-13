@@ -414,7 +414,7 @@ case $OPTION in
 		exit
 	;;
 	3) # Update the script
-		wget https://raw.githubusercontent.com/SchatzM/nginx-autoinstall/master/nginx-autoinstall.sh -O nginx-autoinstall.sh
+		wget https://raw.githubusercontent.com/SchatzM/nginx-autoinstall/rc/nginx-autoinstall.sh -O nginx-autoinstall.sh
 		chmod +x nginx-autoinstall.sh
 		echo ""
 		echo "Update done."
