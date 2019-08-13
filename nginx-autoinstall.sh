@@ -24,6 +24,7 @@ if [[ "$HEADLESS" == "y" ]]; then
 	FANCYINDEX=${FANCYINDEX:-n}
 	CACHEPURGE=${CACHEPURGE:-n}
 	WEBDAV=${WEBDAV:-n}
+	VTS=${VTS:-n}
 	SSL=${SSL:-1}
 	RM_CONF=${RM_CONF:-y}
 	RM_LOGS=${RM_LOGS:-y}
@@ -99,8 +100,11 @@ case $OPTION in
 			while [[ $WEBDAV != "y" && $WEBDAV != "n" ]]; do
 				read -p "       nginx WebDAV [y/n]: " -e WEBDAV
 			done
+			while [[ $VTS != "y" && $VTS != "n" ]]; do
+				read -p "       nginx VTS [y/n]: " -e VTS
+			done
 			echo ""
-                        echo "Apply patches for HTTP2 HPACK encoding, dynamic TLS records and OpenSSL ChaCha cipher prioritization?"
+                        echo "Apply patches for HTTP2 HPACK encoding & dynamic TLS records?"
                         while [[ $PATCH != "y" && $PATCH != "n" ]]; do
                                 read -p "       Apply patches? [y/n]: " -e PATCH
                         done
@@ -234,15 +238,13 @@ case $OPTION in
 		fi
 		cd /usr/local/src/nginx/nginx-${NGINX_VER} || exit 1
 
-		#HPACK & OpenSSL ChaCha patch.
+		#HPACK encoding & dynamic tls records patch.
 		if [[ "$PATCH" = 'y' ]]; then
                         {
                                 wget https://raw.githubusercontent.com/centminmod/centminmod/123.09beta01/patches/cloudflare/nginx-1.15.3_http2-hpack.patch
                                 patch -p1 < nginx-1.15.3_http2-hpack.patch
                                 wget https://raw.githubusercontent.com/nginx-modules/ngx_http_tls_dyn_size/master/nginx__dynamic_tls_records_1.15.5+.patch
                                 patch -p1 < nginx__dynamic_tls_records_1.15.5+.patch
-                                wget https://raw.githubusercontent.com/kn007/patch/master/nginx_auto_using_PRIORITIZE_CHACHA.patch
-                                patch -p1 < nginx_auto_using_PRIORITIZE_CHACHA.patch
                         } >> /tmp/nginx-autoinstall.log 2>&1
                 fi
 
@@ -305,6 +307,11 @@ case $OPTION in
 		if [[ "$WEBDAV" = 'y' ]]; then
 			git clone --quiet https://github.com/arut/nginx-dav-ext-module.git /usr/local/src/nginx/modules/nginx-dav-ext-module
 			NGINX_MODULES=$(echo "$NGINX_MODULES"; echo --with-http_dav_module --add-module=/usr/local/src/nginx/modules/nginx-dav-ext-module)
+		fi
+		
+		if [[ "$VTS" = 'y' ]]; then
+			git clone --quiet https://github.com/vozlt/nginx-module-vts.git /usr/local/src/nginx/modules/nginx-module-vts
+			NGINX_MODULES=$(echo "$NGINX_MODULES"; echo --add-module=/usr/local/src/nginx/modules/nginx-module-vts)
 		fi
 		
 		if [[ "$PATCH" = 'y' ]]; then
